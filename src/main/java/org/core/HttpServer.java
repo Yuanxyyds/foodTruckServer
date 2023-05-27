@@ -20,7 +20,7 @@ public class HttpServer {
 
     public static void main(String[] args){
         LOGGER.info("Server starting...");
-        ConfigurationManager.getInstance().loadConfigurationFile("/Users/liustev6/Documents/Github/webservermain/webserver/src/main/resources/http.json");
+        ConfigurationManager.getInstance().loadConfigurationFile("src/main/resources/http.json");
         Configuration conf = ConfigurationManager.getInstance().getCurrentConfiguration();
         LOGGER.info("Using Port: " + conf.getPort());
         LOGGER.info("Using Webroot: " + conf.getWebroot());

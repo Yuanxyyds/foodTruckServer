@@ -1,36 +1,33 @@
 package org.handler;
 
 
+import org.core.ServerListenerThread;
+import org.database_connection.DatabaseConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class PasswordHandler {
 
-    public static List<String> handle(String method, String path) throws IOException {
-        List<String> stringList = new ArrayList<>();
-        String response = "";
-        String LoggerMessage = "";
+    private final static Logger LOGGER = LoggerFactory.getLogger(ServerListenerThread.class);
+
+    public static boolean handle(String method, Map<String, String> parameters, DatabaseConnection db) throws IOException, SQLException {
+        Boolean success = false;
 
         if (method.equals("GET")) {
-            // Handle GET requests
-            // TODO Handle Password Request
-            response = "API" + path;
-            LoggerMessage = "Received GET message";
-        } else if (method.equals("POST")) {
-            // Handle POST requests
-            // TODO Handle Password Request
-            response = "API" + path;
-            LoggerMessage = "Received POST message";
-        } else {
-            // Handle other HTTP methods
-            response = "Unsupported method: " + method;
-            LoggerMessage = "Unsupported method: " + method;
-        }
-        stringList.add(response);
-        stringList.add(LoggerMessage);
+            success = db.logInAuthorize(parameters.get("uid"), parameters.get("password"));
 
-        return stringList;
+        } else if (method.equals("POST")) {
+            // TODO Handle Password Request
+        } else {
+            // TODO Handle other HTTP methods
+        }
+        return success;
     }
 
 }

@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
-public class ServerListenerThread extends Thread{
+public class ServerListenerThread extends Thread {
     private final static Logger LOGGER = LoggerFactory.getLogger(ServerListenerThread.class);
 
     private final int port;
@@ -20,29 +22,29 @@ public class ServerListenerThread extends Thread{
         this.webroot = webroot;
         this.serverSocket = new ServerSocket(this.port);
     }
+
     @Override
     public void run() {
         try {
             while (serverSocket.isBound() && !serverSocket.isClosed()) {
                 Socket socket = serverSocket.accept();
-                LOGGER.info(" * Connection accepted: " + socket.getInetAddress());
-                HttpConnectionWorkerThread workerThread = null;
-                try {
-                    workerThread = new HttpConnectionWorkerThread(socket);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
+                LOGGER.info(" * Received Request From: " + socket.getInetAddress());
+
+                String clientIP = socket.getInetAddress().getHostAddress();
+                HttpConnectionWorkerThread workerThread = new HttpConnectionWorkerThread(socket);
                 workerThread.start();
             }
 
         } catch (IOException e) {
-             LOGGER.error("Problem with setting socket", e);
+            LOGGER.error("Problem with setting socket", e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         } finally {
-            if (serverSocket != null){
-                try{
+            if (serverSocket != null) {
+                try {
                     serverSocket.close();
-                } catch (IOException e){
-
+                } catch (IOException e) {
+                    // Handle or log exception
                 }
             }
         }

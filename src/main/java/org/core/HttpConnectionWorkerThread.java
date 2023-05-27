@@ -1,6 +1,7 @@
 package org.core;
 
 import org.database_connection.DatabaseConnection;
+import org.handler.PasswordHandler;
 import org.http.HttpParser;
 import org.http.HttpParsingException;
 import org.http.HttpRequest;
@@ -8,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.sql.SQLException;
 
@@ -32,25 +34,38 @@ public class HttpConnectionWorkerThread extends Thread {
 
     @Override
     public void run() {
+        InetAddress address  = socket.getInetAddress();
         InputStream inputStream = null;
         OutputStream outputStream = null;
+        String response = "";
+
         try {
             inputStream = socket.getInputStream();
             outputStream = socket.getOutputStream();
+
             HttpRequest request = httpParser.parseHttpRequest(inputStream);
             String msg = request.getMethod() + request.getRequestTarget();
-            String response = "HTTP/1.1 200 OK\r\n" +
-                    "Content-Type: text/plain\r\n" +
-                    "\r\n" +
-                    msg;
 
+            if (request.getPath().equals("/password")) {
+                PasswordHandler passwordHandler = new PasswordHandler();
+                Boolean success = PasswordHandler.handle(request.getMethod(),
+                        request.getParameter(), databaseConnection);
+
+                response = "HTTP/1.1 200 OK\r\n" +
+                        "Content-Type: text/plain\r\n" +
+                        "\r\n" +
+                        success;
+
+            }
+            LOGGER.info("Response" + response);
             outputStream.write(response.getBytes());
+            LOGGER.info("Request Processed From" + address);
 
-
-            LOGGER.info("Connection Processing Finished.");
         } catch (IOException e) {
-            LOGGER.error("Problem with communication", e);
+            LOGGER.info("Error in Processing Request from" + address);
         } catch (HttpParsingException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
             if (inputStream != null) {
@@ -74,7 +89,7 @@ public class HttpConnectionWorkerThread extends Thread {
                     // Handle or log exception
                 }
             }
-            LOGGER.info("Connection Closed.");
+            LOGGER.info("Connection Closed from" + address);
         }
     }
 }

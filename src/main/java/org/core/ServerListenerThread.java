@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 
 public class ServerListenerThread extends Thread{
     private final static Logger LOGGER = LoggerFactory.getLogger(ServerListenerThread.class);
@@ -25,7 +26,12 @@ public class ServerListenerThread extends Thread{
             while (serverSocket.isBound() && !serverSocket.isClosed()) {
                 Socket socket = serverSocket.accept();
                 LOGGER.info(" * Connection accepted: " + socket.getInetAddress());
-                HttpConnectionWorkerThread workerThread = new HttpConnectionWorkerThread(socket);
+                HttpConnectionWorkerThread workerThread = null;
+                try {
+                    workerThread = new HttpConnectionWorkerThread(socket);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
                 workerThread.start();
             }
 

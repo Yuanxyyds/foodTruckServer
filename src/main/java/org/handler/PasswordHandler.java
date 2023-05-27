@@ -1,40 +1,36 @@
 package org.handler;
 
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-
 import java.io.IOException;
-import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-public class PasswordHandler implements HttpHandler {
-    @Override
-    public void handle(HttpExchange exchange) throws IOException {
-        String method = exchange.getRequestMethod();
+public class PasswordHandler {
+
+    public static List<String> handle(String method, String path) throws IOException {
+        List<String> stringList = new ArrayList<>();
+        String response = "";
+        String LoggerMessage = "";
 
         if (method.equals("GET")) {
             // Handle GET requests
-            String response = "Hello, this is my API!";
-            System.out.println(response);
-            sendResponse(exchange, response);
+            // TODO Handle Password Request
+            response = "API" + path;
+            LoggerMessage = "Received GET message";
         } else if (method.equals("POST")) {
             // Handle POST requests
-            String requestData = exchange.getRequestBody().toString();
-            String response = "Received: " + requestData;
-            System.out.println(response);
-            sendResponse(exchange, response);
+            // TODO Handle Password Request
+            response = "API" + path;
+            LoggerMessage = "Received POST message";
         } else {
             // Handle other HTTP methods
-            String response = "Unsupported method: " + method;
-            sendResponse(exchange, response);
+            response = "Unsupported method: " + method;
+            LoggerMessage = "Unsupported method: " + method;
         }
+        stringList.add(response);
+        stringList.add(LoggerMessage);
+
+        return stringList;
     }
 
-    private void sendResponse(HttpExchange exchange, String response) throws IOException {
-        exchange.sendResponseHeaders(200, response.getBytes().length);
-        OutputStream outputStream = exchange.getResponseBody();
-        outputStream.write(response.getBytes());
-        outputStream.flush();
-        outputStream.close();
-    }
 }

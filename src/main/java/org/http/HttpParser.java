@@ -21,20 +21,24 @@ public class HttpParser {
         HttpRequest request = new HttpRequest();
         try {
             parseRequestLine(reader, request);
+            parseReaders(reader, request);
+            parseBody(reader, request);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        parseReaders(reader, request);
-        parseBody(reader, request);
+
 
         return request;
     }
 
     private void parseBody(InputStreamReader reader, HttpRequest request) {
+        // TODO
     }
 
-    private void parseReaders(InputStreamReader reader, HttpRequest request) {
+    private void parseReaders(InputStreamReader reader, HttpRequest request) throws IOException, HttpParsingException {
+        // TODO
     }
+
 
     private void parseRequestLine(InputStreamReader reader, HttpRequest request) throws IOException, HttpParsingException {
         StringBuilder processingDataBuffer = new StringBuilder();
@@ -63,6 +67,7 @@ public class HttpParser {
                     methodParsed = true;
                 } else if (!requestTargetParsed){
                     LOGGER.debug("Request Line REQ TARGET to Process: {}", processingDataBuffer);
+                    request.setRequestTarget(processingDataBuffer.toString());
                     requestTargetParsed = true;
                 } else {
                     throw new HttpParsingException(HttpStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
@@ -71,7 +76,7 @@ public class HttpParser {
             }else{
                 processingDataBuffer.append((char)_byte);
                 if (!methodParsed){
-                    if (processingDataBuffer.length() > HttpMethod.MAX_LENGTH) {
+                    if (processingDataBuffer.length() > 4) {
                         throw new HttpParsingException(HttpStatusCode.SERVER_ERROR_501_NOT_IMPLEMENTED);
                     }
                 }
